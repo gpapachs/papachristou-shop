@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import Head from "next/head";
 import { getMenu } from "../lib/store";
 import { formatPrice } from "../lib/format";
+import CategoryNav from "../components/CategoryNav";
+import Lightbox from "../components/Lightbox";
 
 export async function getServerSideProps() {
   const data = await getMenu();
@@ -13,6 +15,8 @@ export default function Home({ data }) {
   const [cart, setCart] = useState({}); // { productId: qty }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [zoom, setZoom] = useState(null);
+  const visibleCats = categories.filter((c) => products.some((p) => p.categoryId === c.id));
 
   const setQty = (id, qty) => {
     setCart((c) => {
@@ -68,20 +72,25 @@ export default function Home({ data }) {
           <a href="/katalogos" style={{ fontSize: 13, opacity: 0.7, textDecoration: "underline" }}>Κατάλογος τραπεζιού</a>
         </nav>
 
+        <CategoryNav categories={visibleCats} />
+
         <section className="hero">
           <h1>Πεινάσαμε;-)</h1>
           <p>Σουβλάκι, κοντοσούβλι και μπριζόλες στα κάρβουνα. Διάλεξε, πλήρωσε online με κάρτα, παρέλαβε ζεστό.</p>
         </section>
 
-        {categories.map((cat) => {
+        {visibleCats.map((cat) => {
           const catProducts = products.filter((p) => p.categoryId === cat.id);
-          if (catProducts.length === 0) return null;
           return (
-            <div className="category" key={cat.id}>
+            <div className="category" id={"cat-" + cat.id} key={cat.id}>
               <h2>{cat.name}</h2>
               {catProducts.map((p) => (
                 <div className="product" key={p.id}>
-                  {p.image ? <img src={p.image} alt={p.name} /> : <div className="ph" />}
+                  {p.image ? (
+                    <img src={p.image} alt={p.name} onClick={() => setZoom({ src: p.image, name: p.name })} />
+                  ) : (
+                    <div className="ph" />
+                  )}
                   <div>
                     <div className="name">{p.name}</div>
                     {p.note && <div className="note">{p.note}</div>}
@@ -96,6 +105,8 @@ export default function Home({ data }) {
 
         <footer>© Ψητοπωλείο Παπαχρήστου — Χατζηπέτρου &amp; 25ης Μαρτίου, Τρίκαλα</footer>
       </div>
+
+      <Lightbox image={zoom} onClose={() => setZoom(null)} />
 
       {totalCount > 0 && (
         <div className="cart-bar">

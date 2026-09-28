@@ -62,3 +62,46 @@ nav{display:flex; align-items:center; justify-content:space-between; padding:20p
 .btn-outline{background:transparent; border:1px solid var(--cream);}
 
 footer{padding:32px 0 48px; opacity:0.55; font-size:0.85rem; text-align:center;}
+
+/* ---------- Μενού κατηγοριών (κολλημένο πάνω) ---------- */
+.cat-nav{
+  position:sticky; top:0; z-index:20;
+  display:flex; gap:8px; overflow-x:auto;
+  padding:12px 0;
+  background:var(--forest);
+  border-bottom:1px solid var(--line);
+  scrollbar-width:none;
+}
+.cat-nav::-webkit-scrollbar{display:none;}
+.cat-pill{
+  flex-shrink:0;
+  padding:8px 16px; border-radius:20px;
+  border:1px solid var(--line);
+  font-size:0.9rem; font-weight:600;
+  text-decoration:none; color:var(--cream); opacity:0.75;
+  transition:background .2s, opacity .2s;
+}
+.cat-pill:hover{opacity:1;}
+.cat-pill.active{background:var(--rose-deep); border-color:var(--rose-deep); opacity:1;}
+.category{scroll-margin-top:70px;}
+
+/* ---------- Μεγέθυνση φωτογραφίας ---------- */
+.product img{cursor:zoom-in; transition:transform .15s;}
+.product img:hover{transform:scale(1.05);}
+.lightbox{
+  position:fixed; inset:0; z-index:100;
+  background:rgba(10,16,12,0.92);
+  display:flex; align-items:center; justify-content:center;
+  padding:24px; cursor:zoom-out;
+  animation:lb-in .15s ease-out;
+}
+@keyframes lb-in{from{opacity:0;}to{opacity:1;}}
+.lightbox figure{margin:0; max-width:min(92vw,900px); max-height:90vh; text-align:center; cursor:default;}
+.lightbox img{max-width:100%; max-height:78vh; border-radius:8px; object-fit:contain;}
+.lightbox figcaption{margin-top:12px; font-family:'Fraunces',serif; font-size:1.1rem;}
+.lightbox-close{
+  position:absolute; top:16px; right:16px;
+  width:40px; height:40px; border-radius:50%;
+  border:1px solid var(--line); background:rgba(0,0,0,0.4);
+  color:var(--cream); font-size:1.1rem; cursor:pointer;
+}

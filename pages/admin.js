@@ -4,7 +4,7 @@ import { formatPrice } from "../lib/format";
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
-function resizeImageFile(file, maxWidth = 480, quality = 0.72) {
+function resizeImageFile(file, maxWidth = 800, quality = 0.7) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("Δεν ήταν δυνατή η ανάγνωση του αρχείου"));
