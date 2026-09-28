@@ -1,0 +1,113 @@
+# Ψητοπωλείο Παπαχρήστου — site, διαχειριστικό, κατάλογος, παραγγελίες
+
+Τρεις σελίδες:
+- **`/`** — Παραγγελιοληψία (καλάθι + πληρωμή με κάρτα μέσω Viva) — τιμές διανομής
+- **`/katalogos`** — Online κατάλογος για το τραπέζι (QR code, μόνο για διάβασμα) — τιμές τραπεζιού
+- **`/admin`** — Διαχειριστικό (προστατευμένο με κωδικό) — προσθήκη/διαγραφή προϊόντων, δύο τιμές ανά προϊόν, φωτογραφίες
+
+---
+
+## 1. Δοκιμή στον υπολογιστή σου
+
+Χρειάζεσαι [Node.js](https://nodejs.org). Μετά:
+```
+npm install
+cp .env.example .env.local
+```
+Άνοιξε το `.env.local` και βάλε τον δικό σου `ADMIN_PASSWORD` (οτιδήποτε θες). Τα `VIVA_*` και `KV_*` μπορείς να τα αφήσεις κενά προς το παρόν — δεν τα χρειάζεσαι ακόμα.
+```
+npm run dev
+```
+- Site παραγγελιών: http://localhost:3000
+- Κατάλογος: http://localhost:3000/katalogos
+- Διαχειριστικό: http://localhost:3000/admin (κωδικός: ό,τι έβαλες στο `ADMIN_PASSWORD`)
+
+Τοπικά, το διαχειριστικό αποθηκεύει κατευθείαν στο αρχείο `data/menu.json` — ό,τι αλλάζεις θα το δεις αμέσως.
+
+---
+
+## 2. Deployment στο Vercel (δωρεάν)
+
+1. Φτιάξε δωρεάν λογαριασμό στο https://vercel.com (μπορείς με GitHub).
+2. Αν δεν έχεις GitHub account, φτιάξε ένα στο https://github.com.
+3. Ανέβασε αυτόν τον φάκελο σε ένα καινούριο GitHub repository.
+4. Στο Vercel: **Add New → Project**, επίλεξε το repository, **Deploy**.
+
+Το site σου θα είναι ήδη online, π.χ. `papachristou-shop.vercel.app`.
+
+---
+
+## 3. Supabase — ΑΠΑΡΑΙΤΗΤΟ για να δουλεύει το διαχειριστικό live
+
+Χωρίς αυτό, το `/admin` θα μπορεί να διαβάζει το μενού online, αλλά ΔΕΝ θα μπορεί να αποθηκεύει αλλαγές (το Vercel δεν επιτρέπει εγγραφή σε αρχεία live).
+
+1. Φτιάξε δωρεάν λογαριασμό στο https://supabase.com → **New project**. Δώσε όνομα (π.χ. `papachristou`) και κωδικό για τη βάση (κράτησέ τον κάπου, δεν θα τον ξαναδείς).
+2. Μόλις είναι έτοιμο το project: αριστερό μενού → **SQL Editor** → **New query** → άνοιξε το αρχείο `supabase/schema.sql` από αυτόν τον φάκελο, αντέγραψε το περιεχόμενο, επικόλλησέ το → **Run**. Αυτό φτιάχνει τον πίνακα που κρατάει το μενού.
+3. Αριστερό μενού → **Project Settings → API**. Θα βρεις:
+   - **Project URL** → αυτό είναι το `SUPABASE_URL`
+   - **service_role key** (κάτω από "Project API keys", ΟΧΙ το `anon` key) → αυτό είναι το `SUPABASE_SERVICE_ROLE_KEY`
+
+   ⚠️ Το `service_role key` δίνει πλήρη πρόσβαση στη βάση — μπαίνει ΜΟΝΟ ως environment variable στο Vercel, ποτέ μέσα στον κώδικα ή σε δημόσιο repository.
+4. Στο Vercel: **Settings → Environment Variables**, πρόσθεσε:
+   - `SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `ADMIN_PASSWORD` = ο κωδικός σου για το `/admin`
+5. **Deployments → ... → Redeploy** για να πιάσουν οι νέες μεταβλητές.
+
+Από εδώ και πέρα, ό,τι αλλάζεις στο `/admin` αποθηκεύεται μόνιμα στο Supabase και φαίνεται αμέσως στο `/` και στο `/katalogos`.
+
+
+---
+
+## 4. Χρήση του διαχειριστικού
+
+Άνοιξε `https://το-site-σου.vercel.app/admin`, έβαλε τον κωδικό σου. Εκεί μπορείς να:
+- Προσθέσεις/διαγράψεις κατηγορίες και προϊόντα
+- Αλλάξεις **δύο τιμές** ανά προϊόν: τιμή τραπεζιού (κατάλογος) και τιμή διανομής (παραγγελία)
+- Ανεβάσεις φωτογραφία ανά προϊόν (πατώντας πάνω στο μικρό τετράγωνο)
+- Σημειώσεις προϊόν ως μη διαθέσιμο
+
+Κάθε αλλαγή αποθηκεύεται αυτόματα.
+
+---
+
+## 5. QR code για τα τραπέζια
+
+Μόλις κάνεις deploy, το link `https://το-site-σου.vercel.app/katalogos` είναι ο online κατάλογος. Φτιάξε ένα QR code γι' αυτό το link (π.χ. δωρεάν στο https://www.qr-code-generator.com) και τύπωσέ το στα τραπέζια.
+
+---
+
+## 6. Πληρωμή με Viva (τελευταίο βήμα)
+
+Το site έχει ήδη έτοιμο το κουμπί πληρωμής στο `/` — απλά χρειάζεται τα credentials σου.
+
+1. Άνοιξε λογαριασμό στο https://www.vivapayments.com (χρειάζεται ΑΦΜ, στοιχεία επιχείρησης, τραπεζικό λογαριασμό). Μέχρι να εγκριθεί, δούλεψε με sandbox: https://demo.vivapayments.com.
+2. Dashboard → **Settings → API Access → Smart Checkout** → πάρε **Client ID** και **Client Secret**.
+3. Στο Vercel, **Settings → Environment Variables**, πρόσθεσε:
+   - `VIVA_CLIENT_ID`
+   - `VIVA_CLIENT_SECRET`
+   - `VIVA_DEMO` = `true` (δοκιμαστικά) ή `false` (live)
+   - `VIVA_SOURCE_CODE` (αν χρειάζεται)
+4. Redeploy.
+5. (Προαιρετικό αλλά χρήσιμο) Ρύθμισε webhook στο Viva dashboard → URL: `.../api/webhook`, event **Transaction Payment Created** → πάρε το **Verification Key** και βάλ' το ως `VIVA_WEBHOOK_VERIFICATION_KEY` στο Vercel.
+6. Στο Viva dashboard, στην Payment Source σου, βάλε Success URL: `.../success` και Failure URL: `.../?cancelled=1`.
+
+### Δοκιμαστικές κάρτες
+Στο sandbox (demo.vivapayments.com), το Viva δίνει δοκιμαστικούς αριθμούς καρτών στα docs του — χρησιμοποίησέ τους αντί για αληθινή κάρτα όσο δοκιμάζεις.
+
+---
+
+## 7. Δικό σου domain (προαιρετικό, οποτεδήποτε)
+
+1. Αγόρασε domain από όποιον καταχωρητή θες.
+2. Vercel → **Settings → Domains → Add**, βάλε το domain σου.
+3. Πρόσθεσε τις εγγραφές DNS που θα σου δείξει το Vercel, στο control panel του καταχωρητή.
+
+---
+
+## Ασφάλεια
+
+- Οι τιμές (και τραπεζιού και διανομής) υπολογίζονται πάντα server-side από την αποθηκευμένη βάση — ποτέ από ό,τι στέλνει ο browser.
+- Το `/admin` προστατεύεται με κωδικό (`ADMIN_PASSWORD`) και httpOnly cookie.
+- Τα στοιχεία κάρτας δεν περνάνε ποτέ από δικό σου server — μόνο από τη σελίδα του Viva.
+- Κράτα το `ADMIN_PASSWORD` και τα `VIVA_*` μυστικά — μόνο ως environment variables, ποτέ μέσα στον κώδικα ή σε δημόσιο repository.

@@ -1,0 +1,20 @@
+{
+  "categories": [
+    { "id": "orektika", "name": "Ορεκτικά" },
+    { "id": "salates", "name": "Σαλάτες" },
+    { "id": "temachia", "name": "Τεμάχια" },
+    { "id": "merides", "name": "Μερίδες" },
+    { "id": "anapsiktika", "name": "Αναψυκτικά" }
+  ],
+  "products": [
+    { "id": "p1", "categoryId": "orektika", "name": "Φέτα", "note": "Λάδι, ρίγανη.", "available": true, "priceTableCents": 400, "priceDeliveryCents": 400, "image": null },
+    { "id": "p2", "categoryId": "orektika", "name": "Πατάτες τηγανητές", "note": "", "available": true, "priceTableCents": 350, "priceDeliveryCents": 400, "image": null },
+    { "id": "p3", "categoryId": "salates", "name": "Παξιμάδι", "note": "", "available": true, "priceTableCents": 450, "priceDeliveryCents": 500, "image": null },
+    { "id": "p4", "categoryId": "temachia", "name": "Σουβλάκι χοιρινό", "note": "Συνοδεύεται από ψωμί & λίγες πατάτες τηγανητές.", "available": true, "priceTableCents": 200, "priceDeliveryCents": 220, "image": null },
+    { "id": "p5", "categoryId": "temachia", "name": "Λουκάνικο χωριάτικο", "note": "", "available": true, "priceTableCents": 250, "priceDeliveryCents": 270, "image": null },
+    { "id": "p6", "categoryId": "merides", "name": "Κοντοσούβλι χοιρινό", "note": "Συνοδεύεται από ψωμί & πατάτες τηγανητές.", "available": true, "priceTableCents": 750, "priceDeliveryCents": 800, "image": null },
+    { "id": "p7", "categoryId": "merides", "name": "Μπριζόλα χοιρινή", "note": "", "available": true, "priceTableCents": 850, "priceDeliveryCents": 900, "image": null },
+    { "id": "p8", "categoryId": "anapsiktika", "name": "Νερό 1000ml", "note": "", "available": true, "priceTableCents": 100, "priceDeliveryCents": 150, "image": null },
+    { "id": "p9", "categoryId": "anapsiktika", "name": "Πορτοκαλάδα Κλιάφα μπλε 330ml", "note": "", "available": true, "priceTableCents": 170, "priceDeliveryCents": 220, "image": null }
+  ]
+}
