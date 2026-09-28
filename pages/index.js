@@ -4,6 +4,7 @@ import { getMenu } from "../lib/store";
 import { formatPrice } from "../lib/format";
 import CategoryNav from "../components/CategoryNav";
 import Lightbox from "../components/Lightbox";
+import Marquee from "../components/Marquee";
 
 export async function getServerSideProps() {
   const data = await getMenu();
@@ -63,6 +64,7 @@ export default function Home({ data }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
+      <Marquee />
       <div className="wrap">
         <nav>
           <div className="brand">

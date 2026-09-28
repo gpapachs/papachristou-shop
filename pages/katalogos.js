@@ -4,6 +4,7 @@ import { getMenu } from "../lib/store";
 import { formatPrice } from "../lib/format";
 import CategoryNav from "../components/CategoryNav";
 import Lightbox from "../components/Lightbox";
+import Marquee from "../components/Marquee";
 
 export async function getServerSideProps() {
   const data = await getMenu();
@@ -20,6 +21,7 @@ export default function Katalogos({ data }) {
         <title>Ψητοπωλείο Παπαχρήστου — Κατάλογος</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
+      <Marquee />
       <div className="wrap" style={{ paddingBottom: 60 }}>
         <nav>
           <div className="brand">
