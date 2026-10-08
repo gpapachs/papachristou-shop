@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import { formatPrice } from "../lib/format";
+import ExcelImport from "../components/ExcelImport";
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
@@ -194,6 +195,8 @@ export default function Admin() {
         <div style={{ background: "var(--forest-2)", border: "1px solid var(--line)", borderRadius: 8, padding: "12px 16px", fontSize: 13, opacity: 0.75, marginBottom: 26 }}>
           Κάθε προϊόν έχει <strong>δύο τιμές</strong>: την τιμή που βλέπει ο πελάτης στο τραπέζι (online κατάλογος) και την τιμή παραγγελίας/διανομής — μπορούν να διαφέρουν.
         </div>
+
+        <ExcelImport data={data} onApply={persist} />
 
         {data.categories.map((cat) => {
           const products = data.products.filter((p) => p.categoryId === cat.id);
