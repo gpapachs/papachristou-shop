@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import { formatPrice } from "../lib/format";
 import ExcelImport from "../components/ExcelImport";
+import VersionTag from "../components/VersionTag";
+import { defaultEnglish } from "../lib/i18n";
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
@@ -154,6 +156,10 @@ export default function Admin() {
     });
   };
 
+  const editCategory = (id, patch) => {
+    persist({ ...data, categories: data.categories.map((c) => (c.id === id ? { ...c, ...patch } : c)) });
+  };
+
   const editProduct = (id, patch) => {
     persist({ ...data, products: data.products.map((p) => (p.id === id ? { ...p, ...patch } : p)) });
   };
@@ -181,7 +187,7 @@ export default function Admin() {
       <div className="wrap" style={{ paddingTop: 28, paddingBottom: 60 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 22 }}>
           <div>
-            <div style={{ fontSize: 11, letterSpacing: "0.12em", color: "var(--rose-bright)", fontWeight: 600 }}>ΠΑΠΑΧΡΗΣΤΟΥ · ΔΙΑΧΕΙΡΙΣΤΙΚΟ</div>
+            <div style={{ fontSize: 11, letterSpacing: "0.12em", color: "var(--rose-bright)", fontWeight: 600 }}>ΠΑΠΑΧΡΗΣΤΟΥ · ΔΙΑΧΕΙΡΙΣΤΙΚΟ · <VersionTag /></div>
             <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 24, margin: "4px 0 0" }}>Διαχείριση μενού</h1>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -193,7 +199,7 @@ export default function Admin() {
         </div>
 
         <div style={{ background: "var(--forest-2)", border: "1px solid var(--line)", borderRadius: 8, padding: "12px 16px", fontSize: 13, opacity: 0.75, marginBottom: 26 }}>
-          Κάθε προϊόν έχει <strong>δύο τιμές</strong>: την τιμή που βλέπει ο πελάτης στο τραπέζι (online κατάλογος) και την τιμή παραγγελίας/διανομής — μπορούν να διαφέρουν.
+          Κάθε προϊόν έχει <strong>δύο τιμές</strong>: την τιμή που βλέπει ο πελάτης στο τραπέζι (online κατάλογος) και την τιμή παραγγελίας/διανομής — μπορούν να διαφέρουν. Τα πεδία «EN» είναι τα αγγλικά ονόματα/σημειώσεις· αν μείνουν κενά, το site δείχνει έτοιμη μετάφραση όπου υπάρχει (το γκρι κείμενο μέσα στο πεδίο) αλλιώς το ελληνικό.
         </div>
 
         <ExcelImport data={data} onApply={persist} />
@@ -203,7 +209,15 @@ export default function Admin() {
           return (
             <div key={cat.id} style={{ marginBottom: 26, background: "var(--forest-2)", borderRadius: 10, padding: 16, border: "1px solid var(--line)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 16, color: "var(--rose-bright)", margin: 0 }}>{cat.name}</h2>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                  <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 16, color: "var(--rose-bright)", margin: 0 }}>{cat.name}</h2>
+                  <input
+                    value={cat.nameEn || ""}
+                    onChange={(e) => editCategory(cat.id, { nameEn: e.target.value })}
+                    placeholder={"EN: " + (defaultEnglish("category", cat.name) || "English name")}
+                    style={{ ...inputStyle, width: 180, fontSize: 12, padding: "5px 8px" }}
+                  />
+                </div>
                 <div style={{ display: "flex", gap: 8 }}>
                   <button onClick={() => addProduct(cat.id)} style={btnGhost}>+ Προϊόν</button>
                   <button onClick={() => removeCategory(cat.id)} style={btnDanger}>Διαγραφή κατηγορίας</button>
@@ -263,6 +277,20 @@ export default function Admin() {
                         </label>
                       </div>
                       <input value={p.note} onChange={(e) => editProduct(p.id, { note: e.target.value })} placeholder="Σημείωση (προαιρετικό)" style={inputStyle} />
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <input
+                          value={p.nameEn || ""}
+                          onChange={(e) => editProduct(p.id, { nameEn: e.target.value })}
+                          placeholder={"EN όνομα: " + (defaultEnglish("product", p.name) || "English name (optional)")}
+                          style={{ ...inputStyle, flex: "1 1 180px", fontSize: 12.5 }}
+                        />
+                        <input
+                          value={p.noteEn || ""}
+                          onChange={(e) => editProduct(p.id, { noteEn: e.target.value })}
+                          placeholder={"EN σημείωση: " + (defaultEnglish("note", p.note) || "English note (optional)")}
+                          style={{ ...inputStyle, flex: "2 1 220px", fontSize: 12.5 }}
+                        />
+                      </div>
                       <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, opacity: 0.8 }}>
                         <input type="checkbox" checked={p.available} onChange={(e) => editProduct(p.id, { available: e.target.checked })} />
                         Διαθέσιμο

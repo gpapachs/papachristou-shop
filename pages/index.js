@@ -2,22 +2,35 @@ import { useMemo, useState } from "react";
 import Head from "next/head";
 import { getMenu } from "../lib/store";
 import { formatPrice } from "../lib/format";
+import { resolveLang, UI, catName, prodName, prodNote } from "../lib/i18n";
 import CategoryNav from "../components/CategoryNav";
 import Lightbox from "../components/Lightbox";
 import Marquee from "../components/Marquee";
+import LangToggle from "../components/LangToggle";
+import VersionTag from "../components/VersionTag";
 
-export async function getServerSideProps() {
+export async function getServerSideProps({ req, query }) {
+  const lang = resolveLang(req, query);
   const data = await getMenu();
-  return { props: { data } };
+  return { props: { data, lang } };
 }
 
-export default function Home({ data }) {
+export default function Home({ data, lang }) {
+  const t = UI[lang];
   const { categories, products } = data;
   const [cart, setCart] = useState({}); // { productId: qty }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [zoom, setZoom] = useState(null);
-  const visibleCats = categories.filter((c) => products.some((p) => p.categoryId === c.id));
+
+  const visibleCats = useMemo(
+    () => categories.filter((c) => products.some((p) => p.categoryId === c.id)),
+    [categories, products]
+  );
+  const navCats = useMemo(
+    () => visibleCats.map((c) => ({ id: c.id, name: catName(c, lang) })),
+    [visibleCats, lang]
+  );
 
   const setQty = (id, qty) => {
     setCart((c) => {
@@ -49,7 +62,7 @@ export default function Home({ data }) {
         body: JSON.stringify({ items: items.map((i) => ({ id: i.product.id, qty: i.qty })) }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Κάτι πήγε στραβά.");
+      if (!res.ok) throw new Error(json.error || t.genericError);
       window.location.href = json.url;
     } catch (e) {
       setError(e.message);
@@ -60,63 +73,74 @@ export default function Home({ data }) {
   return (
     <>
       <Head>
-        <title>Ψητοπωλείο Παπαχρήστου — Παραγγελία online</title>
+        <title>{t.orderTitle}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      <Marquee />
+      <Marquee text={t.marquee} />
       <div className="wrap">
         <nav>
           <div className="brand">
             ΠΑΠΑΧΡΗΣΤΟΥ
-            <span className="sub">ΠΑΡΑΔΟΣΙΑΚΟ ΨΗΤΟΠΩΛΕΙΟ</span>
+            <span className="sub">{t.brandSub}</span>
           </div>
-          <a href="/katalogos" style={{ fontSize: 13, opacity: 0.7, textDecoration: "underline" }}>Κατάλογος τραπεζιού</a>
+          <div className="nav-right">
+            <a href="/katalogos" style={{ fontSize: 13, opacity: 0.7, textDecoration: "underline" }}>{t.dineInLink}</a>
+            <LangToggle lang={lang} />
+          </div>
         </nav>
 
-        <CategoryNav categories={visibleCats} />
+        <CategoryNav categories={navCats} />
 
         <section className="hero">
-          <h1>Πεινάσαμε;-)</h1>
-          <p>Σουβλάκι, κοντοσούβλι και μπριζόλες στα κάρβουνα. Διάλεξε, πλήρωσε online με κάρτα, παρέλαβε ζεστό.</p>
+          <h1>{t.orderHero}</h1>
+          <p>{t.orderLede}</p>
         </section>
 
         {visibleCats.map((cat) => {
           const catProducts = products.filter((p) => p.categoryId === cat.id);
           return (
             <div className="category" id={"cat-" + cat.id} key={cat.id}>
-              <h2>{cat.name}</h2>
-              {catProducts.map((p) => (
-                <div className="product" key={p.id}>
-                  {p.image ? (
-                    <img src={p.image} alt={p.name} onClick={() => setZoom({ src: p.image, name: p.name })} />
-                  ) : (
-                    <div className="ph" />
-                  )}
-                  <div>
-                    <div className="name">{p.name}</div>
-                    {p.note && <div className="note">{p.note}</div>}
+              <h2>{catName(cat, lang)}</h2>
+              {catProducts.map((p) => {
+                const name = prodName(p, lang);
+                const note = prodNote(p, lang);
+                return (
+                  <div className="product" key={p.id}>
+                    {p.image ? (
+                      <img src={p.image} alt={name} onClick={() => setZoom({ src: p.image, name })} />
+                    ) : (
+                      <div className="ph" />
+                    )}
+                    <div>
+                      <div className="name">{name}</div>
+                      {note && <div className="note">{note}</div>}
+                    </div>
+                    <div className="price">{formatPrice(p.priceDeliveryCents, lang)}</div>
+                    <QtyControl qty={cart[p.id] || 0} onChange={(qty) => setQty(p.id, qty)} disabled={!p.available} unavailable={t.unavailable} />
                   </div>
-                  <div className="price">{formatPrice(p.priceDeliveryCents)}</div>
-                  <QtyControl qty={cart[p.id] || 0} onChange={(qty) => setQty(p.id, qty)} disabled={!p.available} />
-                </div>
-              ))}
+                );
+              })}
             </div>
           );
         })}
 
-        <footer>© Ψητοπωλείο Παπαχρήστου — Χατζηπέτρου &amp; 25ης Μαρτίου, Τρίκαλα</footer>
+        <footer>
+          {t.footer}
+          <br />
+          <VersionTag />
+        </footer>
       </div>
 
-      <Lightbox image={zoom} onClose={() => setZoom(null)} />
+      <Lightbox image={zoom} onClose={() => setZoom(null)} closeLabel={t.close} />
 
       {totalCount > 0 && (
         <div className="cart-bar">
-          <span>{totalCount} προϊόντα · {formatPrice(totalCents)}</span>
+          <span>{totalCount} {t.items} · {formatPrice(totalCents, lang)}</span>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             {error && <span style={{ fontSize: 13, color: "#3a1c15" }}>{error}</span>}
             <button className="btn" onClick={checkout} disabled={loading}>
-              {loading ? "Μια στιγμή..." : "Πληρωμή με κάρτα (Viva) →"}
+              {loading ? t.wait : t.pay}
             </button>
           </div>
         </div>
@@ -125,8 +149,8 @@ export default function Home({ data }) {
   );
 }
 
-function QtyControl({ qty, onChange, disabled }) {
-  if (disabled) return <span style={{ fontSize: 12, opacity: 0.5 }}>Μη διαθέσιμο</span>;
+function QtyControl({ qty, onChange, disabled, unavailable }) {
+  if (disabled) return <span style={{ fontSize: 12, opacity: 0.5 }}>{unavailable}</span>;
   if (qty === 0) return <button className="qty-btn" onClick={() => onChange(1)}>+</button>;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

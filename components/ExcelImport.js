@@ -2,8 +2,8 @@ import { useRef, useState } from "react";
 import { buildImportPlan } from "../lib/excelImport";
 import { formatPrice } from "../lib/format";
 
-const COLUMNS = ["Κατηγορία", "Όνομα", "Τιμή τραπεζιού (€)", "Τιμή διανομής (€)", "Σημείωση", "Διαθέσιμο (ΝΑΙ/ΟΧΙ)"];
-const EXAMPLE = ["Ορεκτικά", "Φέτα", "4,00", "4,00", "Λάδι, ρίγανη.", "ΝΑΙ"];
+const COLUMNS = ["Κατηγορία", "Όνομα", "Τιμή τραπεζιού (€)", "Τιμή διανομής (€)", "Σημείωση", "Διαθέσιμο (ΝΑΙ/ΟΧΙ)", "Category (EN)", "Name (EN)", "Note (EN)"];
+const EXAMPLE = ["Ορεκτικά", "Φέτα", "4,00", "4,00", "Λάδι, ρίγανη.", "ΝΑΙ", "Starters", "Feta cheese", "Olive oil, oregano."];
 
 export default function ExcelImport({ data, onApply }) {
   const [open, setOpen] = useState(false);
@@ -53,7 +53,7 @@ export default function ExcelImport({ data, onApply }) {
     reset();
   }
 
-  const canApply = plan && plan.add.length + changedUpdates(plan).length > 0;
+  const canApply = plan && plan.add.length + changedUpdates(plan).length + plan.categoryEnUpdates.length > 0;
 
   return (
     <div style={box}>
@@ -69,11 +69,11 @@ export default function ExcelImport({ data, onApply }) {
           <p style={{ fontSize: 13, opacity: 0.8, lineHeight: 1.55, margin: "0 0 12px" }}>
             Κατέβασε το πρότυπο, συμπλήρωσε τα προϊόντα σου και ανέβασέ το. Θα δεις προεπισκόπηση πριν αλλάξει οτιδήποτε.
             Προϊόντα με το ίδιο όνομα στην ίδια κατηγορία <strong>ενημερώνονται</strong> (η φωτογραφία μένει), τα υπόλοιπα <strong>προστίθενται</strong>.
-            Τίποτα δεν διαγράφεται.
+            Τίποτα δεν διαγράφεται. Οι τρεις τελευταίες στήλες (EN) είναι προαιρετικές και δίνουν τα αγγλικά· αν μείνουν κενές, κρατιέται ό,τι αγγλικό υπάρχει ήδη.
           </p>
 
           <div style={{ overflowX: "auto", marginBottom: 12 }}>
-            <table style={{ borderCollapse: "collapse", fontSize: 12, minWidth: 560 }}>
+            <table style={{ borderCollapse: "collapse", fontSize: 12, minWidth: 820 }}>
               <thead>
                 <tr>{COLUMNS.map((c) => <th key={c} style={th}>{c}</th>)}</tr>
               </thead>
@@ -113,6 +113,7 @@ export default function ExcelImport({ data, onApply }) {
                 )}
                 {plan.errors.length > 0 && <Chip color="#E08A7D">{plan.errors.length} με πρόβλημα</Chip>}
                 {plan.newCategories.length > 0 && <Chip color="#E0C87D">νέες κατηγορίες: {plan.newCategories.join(", ")}</Chip>}
+                {plan.categoryEnUpdates.length > 0 && <Chip color="#E0C87D">αγγλικό όνομα κατηγορίας: {plan.categoryEnUpdates.join(", ")}</Chip>}
               </div>
 
               {plan.add.length > 0 && (
@@ -161,6 +162,8 @@ function changedUpdates(plan) {
       b.priceTableCents !== a.priceTableCents ||
       b.priceDeliveryCents !== a.priceDeliveryCents ||
       (b.note || "") !== (a.note || "") ||
+      (b.nameEn || "") !== (a.nameEn || "") ||
+      (b.noteEn || "") !== (a.noteEn || "") ||
       b.available !== a.available
     );
   });
@@ -171,6 +174,7 @@ function describeChange(u) {
   if (b.priceTableCents !== a.priceTableCents) parts.push(`τραπέζι ${formatPrice(b.priceTableCents)} → ${formatPrice(a.priceTableCents)}`);
   if (b.priceDeliveryCents !== a.priceDeliveryCents) parts.push(`διανομή ${formatPrice(b.priceDeliveryCents)} → ${formatPrice(a.priceDeliveryCents)}`);
   if ((b.note || "") !== (a.note || "")) parts.push("νέα σημείωση");
+  if ((b.nameEn || "") !== (a.nameEn || "") || (b.noteEn || "") !== (a.noteEn || "")) parts.push("αγγλικά");
   if (b.available !== a.available) parts.push(a.available ? "γίνεται διαθέσιμο" : "γίνεται μη διαθέσιμο");
   return parts.join(" · ");
 }

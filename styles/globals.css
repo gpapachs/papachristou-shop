@@ -119,3 +119,18 @@ footer{padding:32px 0 48px; opacity:0.55; font-size:0.85rem; text-align:center;}
 .marquee-sep{margin:0 28px; opacity:0.7; font-style:normal;}
 @keyframes marquee-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 @media (prefers-reduced-motion: reduce){ .marquee-track{animation:none;} }
+
+/* ---------- Έκδοση ---------- */
+.version-tag{font-size:0.72rem; letter-spacing:0.04em; opacity:0.7; font-variant-numeric:tabular-nums;}
+footer .version-tag{display:inline-block; margin-top:6px;}
+
+/* ---------- Εναλλαγή γλώσσας ---------- */
+.nav-right{display:flex; align-items:center; gap:14px;}
+.lang-toggle{display:flex; border:1px solid var(--line); border-radius:20px; overflow:hidden;}
+.lang-btn{
+  border:none; background:transparent; color:var(--cream);
+  padding:6px 12px; font-size:0.8rem; font-weight:700; letter-spacing:0.05em;
+  cursor:pointer; opacity:0.6;
+}
+.lang-btn:hover{opacity:1;}
+.lang-btn.active{background:var(--rose-deep); opacity:1;}
